@@ -1,0 +1,20 @@
+##root folder was originally CA
+
+##Git Ignore (NEW 20221206)
+/*
+!/*.gitignore
+!Dockerfile
+!Makefile
+
+!/root
+/root/*
+!/root/src
+!/root/code
+!/root/data
+
+##Don't capture models created (binaries?)
+/ww-root/code/models/*
+!/ww-root/code/models/*.stan
+
+
+#!/ww-root/src #--> now has the server details which we DO NOT want!
