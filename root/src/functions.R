@@ -99,6 +99,7 @@ get_wheel_summary <- function() {
   
 }
 
+
 #' Global data for filters based on summary table from ODMS
 #'
 #' @return data.frame
@@ -150,3 +151,42 @@ get_wheel_wear_focus <- function(plant_text, veh_class, veh_no) {
   
   return(result)
 }
+
+
+
+
+#' Get geometry data based on Track asset, start through distance, end through distance and quantity of historical recordings
+#'
+#' @return data.frame
+#'
+#' @examples get_geom_data()
+get_geom_data <- function(track, start, end, qtyrecords) {
+  
+  conn <- pool::poolCheckout(w_pool)
+  # conn <- DBI::dbConnect(odbc::odbc(), .connection_string = dev_conn_str)
+  
+  query <-  glue::glue_sql("SELECT * FROM [gold.belowrail.asset.track.ringfenced].tf_Geometry({track},{start},{end},{qtyrecords})"
+                           , .con = conn)
+  
+  result <- get_query("get_geom_data", conn, query)
+  pool::poolReturn(conn)
+  
+  return(result)
+  
+  return(result)
+}
+
+
+
+
+
+#' t_odms_start <- wall_clock()
+#' conn_odms         <- DBI::dbConnect(odbc::odbc(), .connection_string = conn_str_odms)
+#' dat_nominal_rates <- get_nominal_rates_data(conn_odms)
+#' conn_odms         <- odbc::dbDisconnect(conn_odms)
+#' log_info(paste0("Nominal rates data extracted in ", delta_seconds_to_string(t_odms_start, wall_clock())))
+#####
+
+
+
+

@@ -10,7 +10,7 @@
 /root/*
 !/root/src
 !/root/code
-!/root/data
+
 
 ##Don't capture models created (binaries?)
 /ww-root/code/models/*

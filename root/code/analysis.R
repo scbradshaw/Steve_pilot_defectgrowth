@@ -13,30 +13,39 @@
 #'              
 #' -------------------------------------------------------------------------
 
-
-#--> Packages ###
+#### INITIAL PREPARATION ####
+#--> Packages ####
 req_packages <- c('tidyverse', 'shiny', 'shinydashboard', 'DT', 'shinyjs', 'shinycssloaders', 'pool', 'logger',
                   'jsonlite', 'DBI', 'odbc', 'rmarkdown', 'plotly', 'zoo', 'sf', 'leaflet', 'leaflet.esri', 'dplyr',
-                  'glue', 'colourpicker', 'lubridate', 'RColorBrewer', 'scales', 'assertthat', 'leaflegend')
+                  'glue', 'colourpicker', 'lubridate', 'RColorBrewer', 'scales', 'assertthat', 'leaflegend'
+                  ,'synchronicity', 'bench')
 
-sapply(req_packages, require, character.only = TRUE)
 
+#' Packages ---------------------------------------------------------------
+new.packages <- req_packages[!(req_packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
+
+#' Libraries ---------------------------------------------------------------
+sapply(req_packages,require,character.only = TRUE, quietly=TRUE)
+
+
+#--> Options ####
 options(scipen = 999)
 options(stringsAsFactors = FALSE)
 
-source("src/query.R")
-source("src/process.R")
-source("src/plot.R")
+source("src/functions.R")
 
-USER <- if (Sys.getenv("SHINYPROXY_USERNAME") != "") {Sys.getenv("SHINYPROXY_USERNAME")} else {"Unauthenticated User"}
+# USER <- if (Sys.getenv("SHINYPROXY_USERNAME") != "") {Sys.getenv("SHINYPROXY_USERNAME")} else {"Unauthenticated User"}
 
 theme_set(theme_bw()) 
 
 config <- jsonlite::read_json("bin/config.json")
+# config
+
+#--> Connection Stuff ####
 
 wheel_region <- "DEV" # DEV, PRD
-
-# wheel_region <- toupper(Sys.getenv("WHEEL_REGION"))
 
 # note: Connection strings default to DEV environment. @fred 7/7/2022
 W_CONN_STR <- ifelse(wheel_region == 'PRD', config$conn_str,
@@ -59,6 +68,34 @@ wall_clock <- function() {
 elapsed_time_in_seconds <- function(start, end, decimals = 2) {
   paste(as.character(round(end - start, decimals)), "s")
 }
+#--> Source Data ####
+# df <- get_geom_data('BW-01ML',0,10000,5)
+saveRDS(df, paste("data/BW-01ML",sep=""))
+#####
 
-##################
+
+#### INVESTIGATION ####
+#--> Load Test Data #####
+getwd()
+setwd("data")
+df <- readRDS(dir()[1])
+setwd("..")
+
+
+#--> Wrangle ####
+#Drop all params except TopLeft
+#remove all NA
+#separate into list objects by date --> order
+#search all to identify regions which are at 8.6 of threshold
+  #subset those regions across all times
+  #subset and microalign
+  #plot image to show peak change
+  #apply crude predictive fitting
+
+
+head(df)
+
+df$MeasurementDate %>% unique()
+
+
 
