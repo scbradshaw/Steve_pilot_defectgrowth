@@ -10,6 +10,15 @@
 #'              
 #' Purpose:     POC to identify track defect and track its growth across time
 #'              Model growth to forcast time to threshold
+#'  
+#'  
+#search all to identify regions which are at 8.6 of threshold
+#subset those regions across all times
+#subset and microalign
+#plot image to show peak change
+#apply crude predictive fitting
+#'  
+#'  
 #'              
 #' -------------------------------------------------------------------------
 
@@ -43,35 +52,35 @@ theme_set(theme_bw())
 config <- jsonlite::read_json("bin/config.json")
 # config
 
-#--> Connection Stuff ####
-
-wheel_region <- "DEV" # DEV, PRD
-
-# note: Connection strings default to DEV environment. @fred 7/7/2022
-W_CONN_STR <- ifelse(wheel_region == 'PRD', config$conn_str,
-                     ifelse(wheel_region == 'UAT', config$uat_conn_str,
-                            ifelse(wheel_region == 'DEV', config$dev_conn_str,
-                                   toupper(ENV))))
-
-w_pool    <- dbPool(odbc::odbc(), .connection_string = W_CONN_STR, timeout = 10)
-
-shiny::onStop(function() {
-  poolClose(w_pool)
-})
-
-
-#' @import bench
-wall_clock <- function() {
-  bench::hires_time()
-}
-
-elapsed_time_in_seconds <- function(start, end, decimals = 2) {
-  paste(as.character(round(end - start, decimals)), "s")
-}
-#--> Source Data ####
-# df <- get_geom_data('BW-01ML',0,10000,5)
-saveRDS(df, paste("data/BW-01ML",sep=""))
-#####
+# #--> [BLOCKED] Connection Stuff ####
+#' 
+#' wheel_region <- "DEV" # DEV, PRD
+#' 
+#' # note: Connection strings default to DEV environment. @fred 7/7/2022
+#' W_CONN_STR <- ifelse(wheel_region == 'PRD', config$conn_str,
+#'                      ifelse(wheel_region == 'UAT', config$uat_conn_str,
+#'                             ifelse(wheel_region == 'DEV', config$dev_conn_str,
+#'                                    toupper(ENV))))
+#' 
+#' w_pool    <- dbPool(odbc::odbc(), .connection_string = W_CONN_STR, timeout = 10)
+#' 
+#' shiny::onStop(function() {
+#'   poolClose(w_pool)
+#' })
+#' 
+#' 
+#' #' @import bench
+#' wall_clock <- function() {
+#'   bench::hires_time()
+#' }
+#' 
+#' elapsed_time_in_seconds <- function(start, end, decimals = 2) {
+#'   paste(as.character(round(end - start, decimals)), "s")
+#' }
+# #--> [BLOCKED] Source Data ####
+# # df <- get_geom_data('BW-01ML',0,10000,5)
+# saveRDS(df, paste("data/BW-01ML",sep=""))
+# #####
 
 
 #### INVESTIGATION ####
@@ -82,20 +91,72 @@ df <- readRDS(dir()[1])
 setwd("..")
 
 
-#--> Wrangle ####
-#Drop all params except TopLeft
-#remove all NA
-#separate into list objects by date --> order
-#search all to identify regions which are at 8.6 of threshold
-  #subset those regions across all times
-  #subset and microalign
-  #plot image to show peak change
-  #apply crude predictive fitting
+#### Wrangle ####
+#--> Change format #### 
+tdf <- melt(df, id = c("RouteId","MeasurementPosition", "ThroughMetreBin", "Kilometre", "Metre", "MeasurementDate")) 
+tdf <- tdf %>% na.omit() 
+tdf <- tdf %>% unite('param', c("MeasurementPosition", "variable"), remove=TRUE)
+tdf$param <- tdf$param %>% str_remove_all("Percentile")
+
+head(tdf)
+tail(tdf)
+
+#--> Split on Record date ####
+datestouse <- tdf$MeasurementDate %>% unique() %>% as.character()
+ldf <- tdf %>% group_split(MeasurementDate)
+names(ldf) <- datestouse
+
+lapply(ldf, head)
+
+#####
 
 
-head(df)
+#### Analysis Case Study ####
 
-df$MeasurementDate %>% unique()
+lapply(ldf, head)
+
+
+
+#--> Select Param of interest ####
+
+
+
+
+#--> Filter for a value near threshold (across all times) ####
+
+
+
+
+
+#--> Subset sections and microalign #####
+
+
+
+
+
+#--> Display Visually ####
+
+
+
+
+
+
+#--> Prediction ####
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
